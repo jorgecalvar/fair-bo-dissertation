@@ -1,2 +1,11 @@
 
+# Pycharm
 .idea/
+**/.ipynb_checkpoints/
+
+# Data
+data/**
+
+# Venv
+.venv/
+
