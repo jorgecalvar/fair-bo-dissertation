@@ -10,7 +10,6 @@ from fair_bo_dissertation.datasets.base_dataset import BaseDataset
 
 
 class GermanCreditDataset(BaseDataset):
-
     target_col = 'target'
     protected_cols = ['sex', 'marital-status', 'age', 'foreign-worker']
 
