@@ -6,6 +6,12 @@
 # Data
 data/**
 
+# Experiments
+experiments/**
+
+# Lightning logs
+lightning_logs/**
+
 # Venv
 .venv/
 

@@ -16,7 +16,7 @@ class SimpleClassifier(pl.LightningModule):
         super().__init__()
 
         self.lr = lr
-        self.loss = nn.CrossEntropyLoss()
+        self.loss = nn.BCELoss()
         self.acc = torchmetrics.Accuracy(task='binary')
         self.auroc = torchmetrics.AUROC(task='binary')
 
@@ -56,7 +56,7 @@ class SimpleClassifier(pl.LightningModule):
 
     def _shared_eval_step(self, batch, batch_idx):
         x, y, _ = batch
-        y_hat = self(x)
+        y_hat = self(x).squeeze(-1)
         loss = self.loss(y_hat, y)
         acc = self.acc(y_hat, y)
         auroc = self.auroc(y_hat, y)
