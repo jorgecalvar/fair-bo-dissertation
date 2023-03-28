@@ -34,6 +34,9 @@ class MOBO_Experiment:
     def _target_function(self, x):
         return torch.tensor([self.target_function(i) for i in x])
 
+    def start(self):
+        pass
+
     def run(self):
 
         x, y = self.init_generator(self.init_points)
@@ -63,7 +66,7 @@ class MOBO_Experiment:
                 random_x = torch.cat([random_x, new_random_x])
                 random_y = torch.cat([random_x, new_random_y])
 
-            # Save
+            # TODO: Save
 
     @classmethod
     def get_new_name(cls, name):
@@ -74,5 +77,3 @@ class MOBO_Experiment:
             if not d.exists():
                 return d
             i += 1
-
-

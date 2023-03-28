@@ -8,7 +8,6 @@ from botorch.sampling.normal import SobolQMCNormalSampler
 from botorch.acquisition.multi_objective.monte_carlo import qExpectedHypervolumeImprovement
 from botorch.utils.multi_objective.box_decompositions.non_dominated import FastNondominatedPartitioning
 
-
 import torch
 
 

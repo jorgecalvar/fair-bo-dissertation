@@ -14,16 +14,18 @@ class AdultDataset(BaseDataset):
     protected_cols = ['race', 'sex', 'native-country', 'age']
 
     def __init__(self,
-                 file_path):
+                 file_path,
+                 protected_col='sex'):
         super().__init__()
         self.file_path = Path(file_path)
+        self.protected_col  = protected_col
         self.X = None
         self.y = None
         self.X_protected = None
         self._load()
 
     def __getitem__(self, idx):
-        return self.X[idx], self.y[idx], self.X_protected[idx]
+        return self.X[idx], self.y[idx], self.X_protected[idx, self.protected_cols.index(self.protected_col)]
 
     def __len__(self):
         return len(self.X)
@@ -62,7 +64,7 @@ class AdultDataset(BaseDataset):
         self.X = torch.tensor(X).float()
 
         # y
-        self.y = torch.tensor(y).int()
+        self.y = torch.tensor(y).float()
 
         # Protected cols
         self.X_protected = torch.zeros((self.X.size()[0], len(self.protected_cols))).int()
