@@ -1,2 +1,2 @@
 
-from simple_classifier import SimpleClassifier
+from .trainer import AutomaticTrainer

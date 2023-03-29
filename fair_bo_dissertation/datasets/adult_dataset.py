@@ -83,4 +83,4 @@ if __name__ == '__main__':
     adult_dataset = AdultDataset(file_path)
 
     print(len(adult_dataset))
-    print(adult_dataset[3])
+    print(adult_dataset[3:5])

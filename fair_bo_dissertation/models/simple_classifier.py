@@ -10,8 +10,8 @@ class SimpleClassifier(pl.LightningModule):
     def __init__(self,
                  input_neurons,
                  dropout=0,
-                 n1=500,
-                 n2=250,
+                 n1=200,
+                 n2=100,
                  lr=0.001):
         super().__init__()
 
@@ -70,8 +70,38 @@ class SimpleClassifier(pl.LightningModule):
             self.validation_protected_confmats[x_protected_value] += self.confusion_matrix(y_hat_p, y_p)
 
     def on_validation_end(self):
+        return
         print(self.validation_confmat)
         print(self.validation_protected_confmats)
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), self.lr)
+
+
+    @classmethod
+    def get_kwargs(cls):
+        return ('dropout', 'n1', 'n2', 'lr')
+
+    @classmethod
+    def unnormalize_kwargs(cls, **kwargs):
+        out_dict = {}
+        for k, v in kwargs.items():
+            if k == 'dropout':
+                out_dict[k] = v * 0.4   # Dropout is mapped to [0, 0.4]
+            elif k == 'n1':
+                min_n1 = 50
+                max_n1 = 500
+                out_dict[k] = int(min_n1 + (max_n1 - min_n1) * v)     # n1 is mapped to [50, 500]
+            elif k == 'n2':
+                if 'n1' in kwargs.keys():
+                    n1 = out_dict['n1']
+                else:
+                    n1 = 200
+                min_n2 = 0.3 * n1
+                max_n2 = 0.6 * n1
+                out_dict[k] = int(min_n2 + (max_n2 - min_n2) * v)  # n2 is mapped to [0.3 * n1, 0.6 * n1]
+            elif k == 'lr':
+                out_dict[k] = 10 ** (- (1 + 4 * v))  # lr is mapped from 1e-5 and 1e-1
+        return out_dict
+
+
