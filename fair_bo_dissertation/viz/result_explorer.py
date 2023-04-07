@@ -26,6 +26,9 @@ class ResultExplorer:
 
         d = self.experiment_dicts[i]
 
+        print(d['bo_x'].numpy())
+        print(d['bo_y'].numpy())
+
         hv = list(d['bo_hv'].numpy())
         random_hv = list(d['random_hv'].numpy())
 
@@ -42,5 +45,4 @@ class ResultExplorer:
             color='model'
         )
         fig.show()
-
 

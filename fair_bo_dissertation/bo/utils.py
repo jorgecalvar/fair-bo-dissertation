@@ -1,6 +1,7 @@
 
 from botorch.optim import optimize_acqf
 from botorch.models import SingleTaskGP
+from botorch.models.transforms.outcome import Standardize
 from botorch.models.model_list_gp_regression import ModelListGP
 from gpytorch.mlls.sum_marginal_log_likelihood import SumMarginalLogLikelihood
 from botorch import fit_gpytorch_mll
@@ -18,7 +19,7 @@ def get_candidates(x,
                    n_points=1):
 
     # Get models
-    model = ModelListGP(*[SingleTaskGP(x, y[:, i:i+1]) for i in range(y.shape[1])])
+    model = ModelListGP(*[SingleTaskGP(x.double(), y[:, i:i+1].double(), outcome_transform=Standardize(m=1)) for i in range(y.shape[1])])
     mll = SumMarginalLogLikelihood(model.likelihood, model)
     fit_gpytorch_mll(mll)
 

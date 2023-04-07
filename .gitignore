@@ -9,6 +9,8 @@ data/**
 # Experiments
 experiments/**
 
+images/**
+
 # Lightning logs
 lightning_logs/**
 

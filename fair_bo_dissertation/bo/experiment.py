@@ -16,8 +16,8 @@ class MOBO_Experiment:
 
     def __init__(self,
                  target_function,
-                 n_iterations=20,
-                 init_points=10,
+                 n_iterations=10,
+                 init_points=2,
                  n_points=1,
                  run_random=True,
                  dir=None
@@ -101,7 +101,8 @@ class MOBO_Experiment:
         # Save
         experiment_dict = {'bo_x': x,
                            'bo_y': y,
-                           'bo_hv': hv}
+                           'bo_hv': hv,
+                           'init_points': self.init_points}
 
         if self.run_random:
             experiment_dict['random_x'] = random_x

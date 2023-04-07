@@ -1,10 +1,12 @@
 import pytorch_lightning as pl
 import torch
+import torchmetrics.functional
 from torch.utils.data import DataLoader, random_split
 import tqdm
 from sklearn.model_selection import KFold
 
 from fair_bo_dissertation.datasets import AdultDataset
+from fair_bo_dissertation.datasets import GermanCreditDataset
 from .simple_classifier import SimpleClassifier
 
 import logging
@@ -23,14 +25,18 @@ class AutomaticTrainer:
                  metrics=['acc', 'diff_tpr'],
                  input_vars=['dropout', 'lr'],
                  n_splits=5,
-                 epochs=10):
+                 epochs=5,
+                 calculate_epoch_metrics=False):
 
         self.n_splits = n_splits
         self.epochs = epochs
+        self.calculate_epoch_metrics = calculate_epoch_metrics
 
         # Load dataset
         if dataset == 'adult_census':
             self.dataset = AdultDataset(self.DATA_DIR / 'adult-census-income' / 'adult-processed.csv')
+        elif dataset == 'german_credit':
+            self.dataset = GermanCreditDataset(self.DATA_DIR / 'german-credit-data' / 'german-credit-processed.csv')
         else:
             raise ValueError(f'The dataset {dataset} is not implemented')
 
@@ -118,6 +124,10 @@ class AutomaticTrainer:
             optimizer = model.configure_optimizers()
             batch_size = 32
 
+            if self.calculate_epoch_metrics:
+                train_loss = []
+                train_acc = []
+
             for _ in range(self.epochs):
                 for batch_idx in tqdm.tqdm(range((len(train_dataset) - 1) // batch_size + 1)):
                     batch = train_dataset[batch_idx * batch_size: (batch_idx + 1) * batch_size]
@@ -126,6 +136,15 @@ class AutomaticTrainer:
                     loss = model.training_step(batch, batch_idx)
                     loss.backward()
                     optimizer.step()
+                if self.calculate_epoch_metrics:
+                    train_loss.append(loss.detach().item())
+                    x, y, _ = train_dataset[:]
+                    model.eval()
+                    with torch.no_grad():
+                        pred_y = model(x).squeeze(-1)
+                    model.train()
+                    train_acc.append(torchmetrics.functional.accuracy(pred_y, y, 'binary'))
+
 
             # Validate
 
@@ -149,6 +168,7 @@ class AutomaticTrainer:
         acc = torch.sum(torch.diag(total_confmat)) / torch.sum(total_confmat)
         tprs = torch.stack([(v[1, 1] / torch.sum(v[1, :])) for v in protected_confmats.values()])
         tpr_diff = torch.min(tprs) - torch.max(tprs) + 1
+
 
         return torch.stack((acc, tpr_diff))
 
