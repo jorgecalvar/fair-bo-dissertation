@@ -10,8 +10,8 @@ class SimpleClassifier(pl.LightningModule):
     def __init__(self,
                  input_neurons,
                  dropout=0,
-                 n1=200,
-                 n2=100,
+                 n1=512,
+                 n2=256,
                  lr=0.001):
         super().__init__()
 

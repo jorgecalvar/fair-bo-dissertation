@@ -25,7 +25,7 @@ class AutomaticTrainer:
                  metrics=['acc', 'diff_tpr'],
                  input_vars=['dropout', 'lr'],
                  n_splits=5,
-                 epochs=5,
+                 epochs=2,
                  calculate_epoch_metrics=False):
 
         self.n_splits = n_splits
@@ -86,7 +86,7 @@ class AutomaticTrainer:
         kwargs_normalized = {k: x[i].item() for i, k in enumerate(self.input_vars)}
         kwargs_unnormalized = self.model_func.unnormalize_kwargs(**kwargs_normalized)
 
-        print(kwargs_unnormalized)
+        # print(kwargs_unnormalized)
 
         total_confmat = torch.zeros((2, 2))
         protected_confmats = {i: torch.zeros((2, 2)) for i in range(2)}
