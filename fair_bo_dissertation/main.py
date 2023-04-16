@@ -37,23 +37,23 @@ def explore():
 
 
 def explore2():
-    rx = ResultExplorer(Path('experiments/experiment8'))
-    print(rx.experiment_dicts[5])
+    rx = ResultExplorer(Path('experiments/experiment9'))
+    rx.plot_several_experiments(0, 6, title='Dataset: Adult | Input: n1, n2')
     quit()
 
 
 if __name__ == '__main__':
 
-    # explore2()
+    explore2()
 
-    plot_results()
+    # plot_results()
 
-    target_function = AutomaticTrainer(calculate_epoch_metrics=False)
+    target_function = AutomaticTrainer(calculate_epoch_metrics=False,
+                                       input_vars=['n1', 'n2'])
 
     # metrics =  target_function(torch.tensor([0.5, 0.5]))
     # print(metrics)
     # quit()
 
-    experiment = MOBO_Experiment(target_function,
-                                 dir=Path('experiments/experiment8'))
-    experiment.run_multiple(n_experiments=26)
+    experiment = MOBO_Experiment(target_function)
+    experiment.run_multiple(n_experiments=30)
