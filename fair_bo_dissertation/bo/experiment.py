@@ -20,16 +20,18 @@ class MOBO_Experiment:
                  init_points=2,
                  n_points=1,
                  run_random=True,
-                 dir=None
+                 dir=None,
+                 device='cpu'
                  ):
 
+        self.device = device
         self.target_function = target_function
         self.n_input_vars = len(target_function.input_vars)
         self.n_iterations = n_iterations
         self.init_points = init_points
         self.n_points = n_points
         self.n_objectives = len(target_function.metrics)
-        self.reference_point = torch.tensor([0] * self.n_objectives)
+        self.reference_point = torch.tensor([0] * self.n_objectives, device=self.device)
         self.run_random = run_random
         if dir is None:
             self.dir = self.create_new_dir()
@@ -37,7 +39,7 @@ class MOBO_Experiment:
             self.dir = dir
 
         # Bounds
-        self.bounds = torch.tensor([[0.] * self.n_input_vars, [1.] * self.n_input_vars])
+        self.bounds = torch.tensor([[0.] * self.n_input_vars, [1.] * self.n_input_vars], device=self.device)
 
         # Logger
         self.logger = logging.getLogger(__name__)
@@ -54,9 +56,9 @@ class MOBO_Experiment:
 
     def run(self):
 
-        x = torch.rand((self.init_points, self.n_input_vars))
+        x = torch.rand((self.init_points, self.n_input_vars), device=self.device)
         y = self._target_function(x)
-        hv = torch.zeros((self.init_points,))
+        hv = torch.zeros((self.init_points,), device=self.device)
         for i in range(len(y)):
             hv[i] = DominatedPartitioning(ref_point=self.reference_point,
                                           Y=y[:i+1]).compute_hypervolume()
@@ -87,7 +89,7 @@ class MOBO_Experiment:
 
             if self.run_random:
 
-                new_random_x = torch.rand((self.n_points, self.n_input_vars))
+                new_random_x = torch.rand((self.n_points, self.n_input_vars), device=self.device)
                 new_random_y = self._target_function(new_random_x)
 
                 random_x = torch.cat([random_x, new_random_x])

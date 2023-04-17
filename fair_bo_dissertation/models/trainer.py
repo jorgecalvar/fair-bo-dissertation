@@ -139,7 +139,7 @@ class AutomaticTrainer:
                 train_acc = []
 
             for _ in range(self.epochs):
-                for batch_idx in tqdm.tqdm(range((len(train_dataset) - 1) // batch_size + 1)):
+                for batch_idx in (range((len(train_dataset) - 1) // batch_size + 1)):
                     batch = train_dataset[batch_idx * batch_size: (batch_idx + 1) * batch_size]
                     # for batch_idx, batch in enumerate(train_loader):
                     optimizer.zero_grad()
