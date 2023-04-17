@@ -28,7 +28,7 @@ class AdultDataset(BaseDataset):
         # To device
         self.X.to(device=device)
         self.y.to(device=device)
-        self.X_protected(device=device)
+        self.X_protected.to(device=device)
 
     def __getitem__(self, idx):
         return self.X[idx], self.y[idx], self.X_protected[idx, self.protected_cols.index(self.protected_col)]
