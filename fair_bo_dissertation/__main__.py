@@ -53,8 +53,7 @@ if __name__ == '__main__':
 
     # plot_results()
 
-    target_function = AutomaticTrainer(calculate_epoch_metrics=False,
-                                       device='cuda')
+    target_function = AutomaticTrainer(calculate_epoch_metrics=False,)
 
     # metrics =  target_function(torch.tensor([0.5, 0.5]))
     # print(metrics)
