@@ -21,7 +21,11 @@ class ResultExplorer:
             d = experiment_dir / f'iter{i}.pt'
             if not d.exists():
                 break
-            self.experiment_dicts.append(torch.load(d))
+            loaded_dict = torch.load(d)
+            for k, v in loaded_dict.items():
+                if isinstance(v, torch.Tensor):
+                    loaded_dict[k] = v.cpu()
+            self.experiment_dicts.append(loaded_dict)
             i += 1
 
         self.n_experiments  = len(self.experiment_dicts)
@@ -42,6 +46,21 @@ class ResultExplorer:
             hv_random = torch.cat((hv_random, hv_random_i.unsqueeze(dim=0)))
 
         return ((hv_bo > hv_random).float().mean())
+
+
+    def find_p(self):
+
+        bo_wins = 0
+        for d in self.experiment_dicts:
+            if d['hv'][-1].item() > d['random_hv'][-1].item():
+                bo_wins += 1
+
+
+        est_p = bo_wins / self.n_experiments
+        err_p = 1.96 * (est_p * (1 - est_p) / self.n_experiments) ** 0.5
+
+        print(f'Estimated p: {est_p:1.4f} +- {err_p:1.4f} = [{est_p - err_p:1.4f}, {est_p + err_p:1.4f}]')
+
 
 
     def plot_hv(self, i=0):
