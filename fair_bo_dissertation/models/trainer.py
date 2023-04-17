@@ -4,6 +4,7 @@ import torchmetrics.functional
 from torch.utils.data import DataLoader, random_split
 import tqdm
 from sklearn.model_selection import KFold
+from concurrent.futures import ThreadPoolExecutor
 
 from fair_bo_dissertation.datasets import AdultDataset
 from fair_bo_dissertation.datasets import GermanCreditDataset
@@ -96,7 +97,11 @@ class AutomaticTrainer:
         total_confmat = torch.zeros((2, 2), device=self.device)
         protected_confmats = {i: torch.zeros((2, 2), device=self.device) for i in range(2)}
 
-        for train_dataset, val_dataset in self.kf_datasets:
+
+        def train_kf_split(train_dataset,
+                           val_dataset,
+                           total_confmat,
+                           protected_confmats):
 
             # Get model
 
@@ -168,6 +173,12 @@ class AutomaticTrainer:
             total_confmat += model.validation_confmat
             for k, v in model.validation_protected_confmats.items():
                 protected_confmats[k] += v
+
+        # Execute simultaneously
+        pool = ThreadPoolExecutor(max_workers=5)
+        for train_dataset, val_dataset in self.kf_datasets:
+            pool.submit(train_kf_split, train_dataset, val_dataset, total_confmat, protected_confmats)
+        pool.shutdown(wait=True, cancel_futures=False)
 
         # Obtain metrics
         acc = torch.sum(torch.diag(total_confmat)) / torch.sum(total_confmat)
