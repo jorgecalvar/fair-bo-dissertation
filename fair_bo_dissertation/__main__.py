@@ -23,12 +23,15 @@ def plot_results():
     quit()
 
 def explore():
-    rx = ResultExplorer(Path('experiments/experiment8'))
+
+    n_points = 3
+
+    rx = ResultExplorer(Path('experiments/experiment11'))
     all_bo_hv = torch.zeros((0,))
     all_random_hv = torch.zeros((0,))
-    for i in range(30):
-        all_bo_hv = torch.cat((all_bo_hv, rx.experiment_dicts[i]['bo_hv']))
-        all_random_hv = torch.cat((all_random_hv, rx.experiment_dicts[i]['random_hv']))
+    for i in range(5):
+        all_bo_hv = torch.cat((all_bo_hv, rx.experiment_dicts[i]['bo_hv'][2:]))
+        all_random_hv = torch.cat((all_random_hv, rx.experiment_dicts[i]['random_hv'][2:]))
 
     print((all_bo_hv > all_random_hv).float().mean())
     print(len(all_bo_hv))
@@ -37,23 +40,26 @@ def explore():
 
 
 def explore2():
-    rx = ResultExplorer(Path('experiments/experiment9'))
-    rx.plot_several_experiments(0, 6, title='Dataset: Adult | Input: n1, n2')
+    rx = ResultExplorer(Path('experiments/experiment11'))
+    rx.plot_several_experiments(0, 4, title='Dataset: Adult | Input: lr, dropout')
     quit()
 
 
 if __name__ == '__main__':
 
-    explore2()
+    # explore()
+
+    # explore2()
 
     # plot_results()
 
-    target_function = AutomaticTrainer(calculate_epoch_metrics=False,
-                                       input_vars=['n1', 'n2'])
+    target_function = AutomaticTrainer(calculate_epoch_metrics=False)
 
     # metrics =  target_function(torch.tensor([0.5, 0.5]))
     # print(metrics)
     # quit()
 
-    experiment = MOBO_Experiment(target_function)
-    experiment.run_multiple(n_experiments=30)
+    experiment = MOBO_Experiment(target_function,
+                                 init_points=5,
+                                 n_iterations=20)
+    experiment.run_multiple(n_experiments=6)

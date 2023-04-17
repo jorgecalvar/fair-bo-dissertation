@@ -91,7 +91,7 @@ class MOBO_Experiment:
                 new_random_y = self._target_function(new_random_x)
 
                 random_x = torch.cat([random_x, new_random_x])
-                random_y = torch.cat([random_x, new_random_y])
+                random_y = torch.cat([random_y, new_random_y])
 
                 new_random_hv = DominatedPartitioning(ref_point=self.reference_point,
                                                       Y=random_y).compute_hypervolume()

@@ -48,7 +48,7 @@ class SimpleClassifier(pl.LightningModule):
         x, y, _ = batch
         y_hat = self(x).squeeze(-1)
         loss = self.loss(y_hat, y)
-        self.log('train_loss', loss)
+        # self.log('train_loss', loss)
         return loss
 
     def on_validation_start(self):
@@ -59,7 +59,7 @@ class SimpleClassifier(pl.LightningModule):
         x, y, x_protected = batch
         y_hat = self(x).squeeze(-1)
         loss = self.loss(y_hat, y)
-        self.log('val_loss', loss)
+        # self.log('val_loss', loss)
         self.validation_confmat += self.confusion_matrix(y_hat, y)
         for x_protected_value in torch.unique(x_protected):
             x_protected_value = x_protected_value.item()

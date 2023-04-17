@@ -87,7 +87,7 @@ class ResultExplorer:
             x='accuracy',
             y='fairness',
             color='model',
-            title=f'Experiment {i+1} | Hypervolume (BO: {hv_bo:.2f} / Random: {hv_random:.2f})',
+            title=f'Experiment {i+1} | Hypervolume (BO: {hv_bo:.5f} / Random: {hv_random:.5f})',
             template='plotly_white',
             range_x=[0,1.05],
             range_y=[0,1.05]
@@ -111,7 +111,7 @@ class ResultExplorer:
 
         fig = make_subplots(
             cols=2, rows=(max_i-min_i)//2,
-            subplot_titles=[f'Experiment {i+1} | Hypervolume (BO: {hvs_bo[row]:.2f} / Random: {hvs_random[row]:.2f}) ' for row, i in enumerate(range(min_i, max_i))]
+            subplot_titles=[f'Experiment {i+1} | Hypervolume (BO: {hvs_bo[row]:.5f} / Random: {hvs_random[row]:.5f}) ' for row, i in enumerate(range(min_i, max_i))]
         )
 
         for row, i in enumerate(range(min_i, max_i)):
@@ -148,11 +148,11 @@ class ResultExplorer:
 
         fig.update_layout(
             width=1200,
-            height=2000,
+            height=200 + 600 * (max_i - min_i) // 2,
             template='plotly_white'
         )
-        fig.update_xaxes(range=[-0.05,1.05], title='accuracy')
-        fig.update_yaxes(range=[-0.05,1.05], title='fairness')
+        fig.update_xaxes(range=[0.6,1.05], title='accuracy')
+        fig.update_yaxes(range=[0.8,1.05], title='fairness')
 
         if title:
             fig.update_layout(title=title)

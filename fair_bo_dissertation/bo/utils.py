@@ -42,6 +42,8 @@ def get_candidates(x,
         sampler=sampler,
     )
 
+    # FastNondominatedPartitioning(ref_point=reference_point, Y=torch.Tensor([[0.2, 0.8], [0.7, 0.3]]),)
+
     # Optimize
     candidates, _ = optimize_acqf(
         acq_function=acq_func,
