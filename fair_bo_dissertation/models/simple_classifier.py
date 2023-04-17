@@ -52,7 +52,7 @@ class SimpleClassifier(pl.LightningModule):
         return loss
 
     def on_validation_start(self):
-        self.validation_confmat = torch.zeros((2, 2))
+        self.validation_confmat = torch.zeros((2, 2), device=self.device)
         self.validation_protected_confmats = {}
 
     def validation_step(self, batch, batch_idx):
@@ -66,7 +66,7 @@ class SimpleClassifier(pl.LightningModule):
             y_p = y[x_protected == x_protected_value]
             y_hat_p = y_hat[x_protected == x_protected_value]
             if x_protected_value not in self.validation_protected_confmats.keys():
-                self.validation_protected_confmats[x_protected_value] = torch.zeros((2,2))
+                self.validation_protected_confmats[x_protected_value] = torch.zeros((2,2), device=self.device)
             self.validation_protected_confmats[x_protected_value] += self.confusion_matrix(y_hat_p, y_p)
 
     def on_validation_end(self):
