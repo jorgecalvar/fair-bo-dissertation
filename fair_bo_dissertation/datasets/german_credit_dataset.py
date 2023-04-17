@@ -15,13 +15,19 @@ class GermanCreditDataset(BaseDataset):
 
     def __init__(self,
                  file_path,
-                 protected_col='sex'):
+                 protected_col='sex',
+                 device='cpu'):
         self.file_path = Path(file_path)
         self.X = None
         self.y = None
         self.X_protected = None
         self.protected_col = protected_col
         self._load()
+
+        # To device
+        self.X.to(device=device)
+        self.y.to(device=device)
+        self.X_protected(device=device)
 
     def __getitem__(self, idx):
         return self.X[idx], self.y[idx], self.X_protected[idx, self.protected_cols.index(self.protected_col)]

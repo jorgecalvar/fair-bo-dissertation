@@ -26,17 +26,22 @@ class AutomaticTrainer:
                  input_vars=['dropout', 'lr'],
                  n_splits=5,
                  epochs=2,
-                 calculate_epoch_metrics=False):
+                 calculate_epoch_metrics=False,
+                 device='cpu'):
 
         self.n_splits = n_splits
         self.epochs = epochs
         self.calculate_epoch_metrics = calculate_epoch_metrics
+        self.device = device
+        assert self.device in ('cuda', 'cpu')
 
         # Load dataset
         if dataset == 'adult_census':
-            self.dataset = AdultDataset(self.DATA_DIR / 'adult-census-income' / 'adult-processed.csv')
+            self.dataset = AdultDataset(self.DATA_DIR / 'adult-census-income' / 'adult-processed.csv',
+                                        device=self.device)
         elif dataset == 'german_credit':
-            self.dataset = GermanCreditDataset(self.DATA_DIR / 'german-credit-data' / 'german-credit-processed.csv')
+            self.dataset = GermanCreditDataset(self.DATA_DIR / 'german-credit-data' / 'german-credit-processed.csv',
+                                               device=self.device)
         else:
             raise ValueError(f'The dataset {dataset} is not implemented')
 
@@ -88,14 +93,14 @@ class AutomaticTrainer:
 
         # print(kwargs_unnormalized)
 
-        total_confmat = torch.zeros((2, 2))
-        protected_confmats = {i: torch.zeros((2, 2)) for i in range(2)}
+        total_confmat = torch.zeros((2, 2), device=self.device)
+        protected_confmats = {i: torch.zeros((2, 2), device=self.device) for i in range(2)}
 
         for train_dataset, val_dataset in self.kf_datasets:
 
             # Get model
 
-            model = self.model_func(len(self.dataset[0][0]), **kwargs_unnormalized)
+            model = self.model_func(len(self.dataset[0][0]), **kwargs_unnormalized).to(device=self.device)
 
             # Prepare data
 
