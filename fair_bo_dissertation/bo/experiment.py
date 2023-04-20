@@ -50,8 +50,10 @@ class MOBO_Experiment:
         return torch.stack(a)
 
     def run_multiple(self,
-                     n_experiments=20):
-        for _ in range(n_experiments):
+                     n_experiments,
+                     verbose=True):
+        for i in range(n_experiments):
+            print(f'Running experiment {i}...')
             self.run()
 
     def run(self):

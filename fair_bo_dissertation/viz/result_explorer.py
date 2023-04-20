@@ -52,7 +52,7 @@ class ResultExplorer:
 
         bo_wins = 0
         for d in self.experiment_dicts:
-            if d['hv'][-1].item() > d['random_hv'][-1].item():
+            if d['bo_hv'][-1].item() > d['random_hv'][-1].item():
                 bo_wins += 1
 
 

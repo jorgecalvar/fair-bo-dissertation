@@ -45,7 +45,15 @@ def explore2():
     quit()
 
 
+def find_p():
+    rx = ResultExplorer(Path('experiments/experiment1'))
+    rx.find_p()
+    quit()
+
+
 if __name__ == '__main__':
+
+    # find_p()
 
     # explore()
 
@@ -53,7 +61,9 @@ if __name__ == '__main__':
 
     # plot_results()
 
-    target_function = AutomaticTrainer(calculate_epoch_metrics=False,)
+    target_function = AutomaticTrainer(dataset='adult_census',
+                                       calculate_epoch_metrics=False,
+                                       input_vars=['n1', 'n2'])
 
     # metrics =  target_function(torch.tensor([0.5, 0.5]))
     # print(metrics)
@@ -61,5 +71,6 @@ if __name__ == '__main__':
 
     experiment = MOBO_Experiment(target_function,
                                  init_points=5,
-                                 n_iterations=20)
-    experiment.run_multiple(n_experiments=6)
+                                 n_iterations=15,
+                                 dir=Path('experiments/experiment0'))
+    experiment.run_multiple(n_experiments=36)
