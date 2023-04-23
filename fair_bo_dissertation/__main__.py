@@ -96,6 +96,7 @@ def run_dir(experiment_dir: Path):
                                  init_points=config['init_points'],
                                  n_iterations=config['n_iterations'],
                                  acquisition=config['acquisition'],
+                                 n_points=config['n_points'],
                                  dir=experiment_dir,
                                  device=device)
 
