@@ -140,7 +140,7 @@ class qNEHVI_CandidateSearcher(BOCandidateSearcher):
 
 
 
-class qNParEGO_CandidateSearcher(BOCandidateSearcher, n_points=1):
+class qNParEGO_CandidateSearcher(BOCandidateSearcher):
 
     def _optimize(self, model, x, y, sampler, n_points=1):
 
