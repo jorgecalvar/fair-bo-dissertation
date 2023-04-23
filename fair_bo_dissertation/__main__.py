@@ -13,14 +13,20 @@ parser = ArgumentParser()
 subparsers = parser.add_subparsers()
 
 train_parser = subparsers.add_parser('train')
-train_parser.add_argument('--dataset', nargs='+', type=str,
+train_parser.add_argument('--dataset', nargs='+', type=str, default='all',
                           choices=['adult_census', 'german_credit'],
                           help='Datasets to use')
-train_parser.add_argument('--acquisition', nargs='+', type=str, default='qehvi',
+train_parser.add_argument('--acquisition', nargs='+', type=str, default='all',
                           choices=['qehvi', 'nqehvi', 'qnparego'],
                           help='Acquisition function')
-
-
+train_parser.add_argument('--device', type=str, default='auto',
+                          choices=['cpu', 'gpu', 'auto'],
+                          help='Whether to run on CPU or GPU')
+train_parser.add_argument('--input_vars', nargs='+', type=str, default=['lr', 'dropout'],
+                          choices=['lr', 'dropout', 'n1', 'n2'],
+                          help='Hyperparameters that will be optimized')
+train_parser.add_argument('--n_experiments', type=int, default=100,
+                          help='How many identical experiments to run')
 
 def plot_results():
     rx = ResultExplorer(Path('experiments/experiment8'))
@@ -63,6 +69,27 @@ def find_p():
 if __name__ == '__main__':
 
     args = parser.parse_args()
+
+    if args.command == 'train':
+
+        if args.dataset == 'all':
+            datasets = AutomaticTrainer.VALID_DATASETS
+        else:
+            datasets = args.dataset
+
+        for dataset in datasets:
+
+            target_function = AutomaticTrainer(dataset=dataset,
+                                               calculate_epoch_metrics=False,
+                                               input_vars=args.input_vars)
+
+            experiment = MOBO_Experiment(target_function,
+                                         init_points=5,
+                                         n_iterations=15)
+
+            experiment.run_multiple(n_experiments=args.n_experiments)
+
+
     print(args)
 
     quit()
@@ -75,16 +102,9 @@ if __name__ == '__main__':
 
     # plot_results()
 
-    target_function = AutomaticTrainer(dataset='adult_census',
-                                       calculate_epoch_metrics=False,
-                                       input_vars=['n1', 'n2'])
 
     # metrics =  target_function(torch.tensor([0.5, 0.5]))
     # print(metrics)
     # quit()
 
-    experiment = MOBO_Experiment(target_function,
-                                 init_points=5,
-                                 n_iterations=15,
-                                 dir=Path('experiments/experiment0'))
-    experiment.run_multiple(n_experiments=36)
+

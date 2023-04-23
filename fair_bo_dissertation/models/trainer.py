@@ -19,6 +19,7 @@ class AutomaticTrainer:
     """When called, this class trains a model with a certain dataset and returns a list of metrics"""
 
     DATA_DIR = Path('data')
+    VALID_DATASETS = ('adult_census', 'german_credit')
 
     def __init__(self,
                  dataset: Literal['adult_census', 'german_credit'] = 'adult_census',
