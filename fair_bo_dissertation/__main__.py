@@ -20,13 +20,17 @@ train_parser.add_argument('--acquisition', nargs='+', type=str, default='all',
                           choices=['qehvi', 'nqehvi', 'qnparego'],
                           help='Acquisition function')
 train_parser.add_argument('--device', type=str, default='auto',
-                          choices=['cpu', 'gpu', 'auto'],
+                          choices=['cpu', 'cuda', 'auto'],
                           help='Whether to run on CPU or GPU')
 train_parser.add_argument('--input_vars', nargs='+', type=str, default=['lr', 'dropout'],
                           choices=['lr', 'dropout', 'n1', 'n2'],
                           help='Hyperparameters that will be optimized')
 train_parser.add_argument('--n_experiments', type=int, default=100,
                           help='How many identical experiments to run')
+train_parser.add_argument('--init_points', type=int, default=5,
+                          help='How many initial random points to generate before starting the experiment')
+train_parser.add_argument('--n_iterations', type=int, default=15,
+                          help='How many iterations to run')
 
 def plot_results():
     rx = ResultExplorer(Path('experiments/experiment8'))
@@ -72,29 +76,53 @@ if __name__ == '__main__':
 
     if args.command == 'train':
 
+        # Dataset
         if args.dataset == 'all':
             datasets = AutomaticTrainer.VALID_DATASETS
         else:
             datasets = args.dataset
 
+        # Device
+        if args.device == 'auto':
+            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        else:
+            device = args.device
+
+        # Acquisition
+        if args.acquisition == 'all':
+            acquisitions = MOBO_Experiment.VALID_ACQUISITIONS
+        else:
+            acquisitions = args.acquisition
+
+
+        # RUN
+
         for dataset in datasets:
 
-            target_function = AutomaticTrainer(dataset=dataset,
-                                               calculate_epoch_metrics=False,
-                                               input_vars=args.input_vars)
+            for acquisition in acquisitions:
 
-            experiment = MOBO_Experiment(target_function,
-                                         init_points=5,
-                                         n_iterations=15)
+                dir = MOBO_Experiment.create_new_dir()
 
-            experiment.run_multiple(n_experiments=args.n_experiments)
+                target_function = AutomaticTrainer(dataset=dataset,
+                                                   calculate_epoch_metrics=False,
+                                                   input_vars=args.input_vars,
+                                                   device=device)
+
+                experiment = MOBO_Experiment(target_function,
+                                             init_points=args.init_points,
+                                             n_iterations=args.n_iterations,
+                                             acquisition=acquisition,
+                                             dir=dir,
+                                             device=device)
+
+                experiment.run_multiple(n_experiments=args.n_experiments)
 
 
     print(args)
 
     quit()
 
-    find_p()
+    # find_p()
 
     # explore()
 
