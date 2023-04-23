@@ -1,6 +1,6 @@
 
 import torch
-from fair_bo_dissertation.bo.utils import get_candidates
+from fair_bo_dissertation.bo.candidate_search import get_candidates
 from botorch.utils.multi_objective.box_decompositions.dominated import DominatedPartitioning
 import plotly.express as px
 import pandas as pd

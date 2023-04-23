@@ -10,6 +10,15 @@ from fair_bo_dissertation.viz import ResultExplorer
 
 
 parser = ArgumentParser()
+subparsers = parser.add_subparsers()
+
+train_parser = subparsers.add_parser('train')
+train_parser.add_argument('--dataset', nargs='+', type=str,
+                          choices=['adult_census', 'german_credit'],
+                          help='Datasets to use')
+train_parser.add_argument('--acquisition', nargs='+', type=str, default='qehvi',
+                          choices=['qehvi', 'nqehvi', 'qnparego'],
+                          help='Acquisition function')
 
 
 
@@ -52,6 +61,11 @@ def find_p():
 
 
 if __name__ == '__main__':
+
+    args = parser.parse_args()
+    print(args)
+
+    quit()
 
     find_p()
 

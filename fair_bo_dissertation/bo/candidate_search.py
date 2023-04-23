@@ -19,7 +19,26 @@ from botorch.utils.multi_objective.scalarization import get_chebyshev_scalarizat
 import torch
 
 
-class BO_Optimizer:
+class CandidateSearcher(ABC):
+
+    def __init__(self,
+                 device='cpu'):
+        self.device=device
+
+    @abstractmethod
+    def get_candidates(self, x, y, n_points=1):
+        pass
+
+class RandomCandidateSearcher(CandidateSearcher):
+
+    def get_candidates(self,
+                       x,
+                       y,
+                       n_points=1):
+        return torch.rand((n_points, 2), device=self.device)
+
+
+class BOCandidateSearcher(CandidateSearcher):
 
     NUM_RESTARTS = 200
     RAW_SAMPLES = 512
@@ -27,11 +46,10 @@ class BO_Optimizer:
     def __init__(self,
                  bounds,
                  reference_point,
-                 n_points,
                  device='cpu'):
+        super().__init__(device)
         self.bounds = bounds
         self.reference_point = reference_point
-        self.device = device
 
     def get_candidates(self,
                        x,
@@ -44,9 +62,9 @@ class BO_Optimizer:
         fit_gpytorch_mll(mll)
 
         # Sampler
-        self.sampler = SobolQMCNormalSampler(sample_shape=torch.Size([128]))
+        sampler = SobolQMCNormalSampler(sample_shape=torch.Size([128]))
 
-        candidates = self._optimize()
+        candidates = self._optimize(model, x, y, sampler, n_points=n_points)
 
         return candidates
 
@@ -56,8 +74,7 @@ class BO_Optimizer:
 
 
 
-
-class qEHVI_Optimizer(BO_Optimizer):
+class qEHVI_CandidateSearcher(BOCandidateSearcher):
 
     def _optimize(self, model, x, y, sampler, n_points=1):
 
@@ -94,7 +111,7 @@ class qEHVI_Optimizer(BO_Optimizer):
 
 
 
-class qNEHVI_Optimizer(BO_Optimizer):
+class qNEHVI_CandidateSearcher(BOCandidateSearcher):
 
     def _optimize(self, model, x, y, sampler, n_points=1):
 
@@ -123,7 +140,7 @@ class qNEHVI_Optimizer(BO_Optimizer):
 
 
 
-class qNParEGO_Optimizer(BO_Optimizer, n_points=1):
+class qNParEGO_CandidateSearcher(BOCandidateSearcher, n_points=1):
 
     def _optimize(self, model, x, y, sampler, n_points=1):
 
