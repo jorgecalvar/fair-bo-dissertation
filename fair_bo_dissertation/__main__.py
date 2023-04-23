@@ -35,7 +35,7 @@ train_parser.add_argument('--n_points', type=int, default=1,
                           help='How many new candidates to obtain in each iteration')
 
 visualize_parser = subparsers.add_parser('visualize')
-visualize_parser.add_argument('experiment', type=str, required=True,
+visualize_parser.add_argument('experiment', type=str,
                               help='Name of the dir where the experiment you want to visualize is')
 
 
