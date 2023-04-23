@@ -10,7 +10,7 @@ from fair_bo_dissertation.viz import ResultExplorer
 
 
 parser = ArgumentParser()
-subparsers = parser.add_subparsers()
+subparsers = parser.add_subparsers(dest='command')
 
 train_parser = subparsers.add_parser('train')
 train_parser.add_argument('--dataset', nargs='+', type=str, default='all',
@@ -75,6 +75,34 @@ def find_p():
     quit()
 
 
+
+def run_dir(experiment_dir: Path):
+
+    with (experiment_dir / 'config.yaml').open() as f:
+        config = yaml.safe_load(f)
+
+    # Device
+    if config['device'] in ('auto', 'cuda'):
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    else:
+        device = 'cpu'
+
+    target_function = AutomaticTrainer(dataset=config['dataset'],
+                                       calculate_epoch_metrics=False,
+                                       input_vars=config['input_vars'],
+                                       device=config['device'])
+
+    experiment = MOBO_Experiment(target_function,
+                                 init_points=config['init_points'],
+                                 n_iterations=config['n_iterations'],
+                                 acquisition=config['acquisition'],
+                                 dir=experiment_dir,
+                                 device=device)
+
+    experiment.run_multiple(n_experiments=args.n_experiments)
+
+
+
 if __name__ == '__main__':
 
     args = parser.parse_args()
@@ -87,11 +115,7 @@ if __name__ == '__main__':
         else:
             datasets = args.dataset
 
-        # Device
-        if args.device == 'auto':
-            device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        else:
-            device = args.device
+
 
         # Acquisition
         if args.acquisition == 'all':
@@ -99,7 +123,9 @@ if __name__ == '__main__':
         else:
             acquisitions = args.acquisition
 
-        # RUN
+        # CREATE DIRS WITH CONFIGS
+
+        new_experiment_dirs = []
 
         for dataset in datasets:
 
@@ -121,19 +147,15 @@ if __name__ == '__main__':
                 with (experiment_dir / 'config.yaml').open('w') as f:
                     yaml.dump(config, f)
 
-                # target_function = AutomaticTrainer(dataset=dataset,
-                #                                    calculate_epoch_metrics=False,
-                #                                    input_vars=args.input_vars,
-                #                                    device=device)
-                #
-                # experiment = MOBO_Experiment(target_function,
-                #                              init_points=args.init_points,
-                #                              n_iterations=args.n_iterations,
-                #                              acquisition=acquisition,
-                #                              dir=dir,
-                #                              device=device)
-                #
-                # experiment.run_multiple(n_experiments=args.n_experiments)
+                new_experiment_dirs.append(experiment_dir)
+
+                break
+            break
+
+        # RUN
+
+        for experiment_dir in new_experiment_dirs:
+            run_dir(experiment_dir)
 
 
     print(args)
