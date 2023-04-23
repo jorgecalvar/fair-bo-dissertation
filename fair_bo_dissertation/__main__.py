@@ -34,7 +34,9 @@ train_parser.add_argument('--n_iterations', type=int, default=15,
 train_parser.add_argument('--n_points', type=int, default=1,
                           help='How many new candidates to obtain in each iteration')
 
-
+visualize_parser = subparsers.add_parser('visualize')
+visualize_parser.add_argument('experiment', type=str, required=True,
+                              help='Name of the dir where the experiment you want to visualize is')
 
 
 def plot_results():
@@ -45,6 +47,7 @@ def plot_results():
     for i in range(5):
         rx.plot_scatter(i)
     quit()
+
 
 def explore():
 
@@ -66,12 +69,6 @@ def explore():
 def explore2():
     rx = ResultExplorer(Path('experiments/experiment11'))
     rx.plot_several_experiments(0, 4, title='Dataset: Adult | Input: lr, dropout')
-    quit()
-
-
-def find_p():
-    rx = ResultExplorer(Path('experiments/experiment1'))
-    rx.find_p()
     quit()
 
 
@@ -116,8 +113,6 @@ if __name__ == '__main__':
         else:
             datasets = args.dataset
 
-
-
         # Acquisition
         if args.acquisition == 'all':
             acquisitions = MOBO_Experiment.VALID_ACQUISITIONS
@@ -155,6 +150,11 @@ if __name__ == '__main__':
 
         for experiment_dir in new_experiment_dirs:
             run_dir(experiment_dir)
+
+    elif args.command == 'visualize':
+
+        rx = ResultExplorer(Path(f'experiments/{args.experiment}'))
+        rx.find_p()
 
 
     print(args)
