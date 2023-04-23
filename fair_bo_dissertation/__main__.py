@@ -1,8 +1,8 @@
 
 from argparse import ArgumentParser
-import logging
 from pathlib import Path
 import torch
+import yaml
 
 from fair_bo_dissertation.bo import MOBO_Experiment
 from fair_bo_dissertation.models import AutomaticTrainer
@@ -31,6 +31,11 @@ train_parser.add_argument('--init_points', type=int, default=5,
                           help='How many initial random points to generate before starting the experiment')
 train_parser.add_argument('--n_iterations', type=int, default=15,
                           help='How many iterations to run')
+train_parser.add_argument('--n_points', type=int, default=1,
+                          help='How many new candidates to obtain in each iteration')
+
+
+
 
 def plot_results():
     rx = ResultExplorer(Path('experiments/experiment8'))
@@ -94,28 +99,41 @@ if __name__ == '__main__':
         else:
             acquisitions = args.acquisition
 
-
         # RUN
 
         for dataset in datasets:
 
             for acquisition in acquisitions:
 
-                dir = MOBO_Experiment.create_new_dir()
+                experiment_dir = MOBO_Experiment.create_new_dir()
 
-                target_function = AutomaticTrainer(dataset=dataset,
-                                                   calculate_epoch_metrics=False,
-                                                   input_vars=args.input_vars,
-                                                   device=device)
+                config = {
+                    'device': args.device,
+                    'dataset': dataset,
+                    'acquisition': acquisition,
+                    'input_vars': args.input_vars,
+                    'init_points': args.init_points,
+                    'n_iterations': args.n_iterations,
+                    'n_experiments': args.n_experiments,
+                    'n_points': args.n_points
+                }
 
-                experiment = MOBO_Experiment(target_function,
-                                             init_points=args.init_points,
-                                             n_iterations=args.n_iterations,
-                                             acquisition=acquisition,
-                                             dir=dir,
-                                             device=device)
+                with (experiment_dir / 'config.yaml').open('w') as f:
+                    yaml.dump(config, f)
 
-                experiment.run_multiple(n_experiments=args.n_experiments)
+                # target_function = AutomaticTrainer(dataset=dataset,
+                #                                    calculate_epoch_metrics=False,
+                #                                    input_vars=args.input_vars,
+                #                                    device=device)
+                #
+                # experiment = MOBO_Experiment(target_function,
+                #                              init_points=args.init_points,
+                #                              n_iterations=args.n_iterations,
+                #                              acquisition=acquisition,
+                #                              dir=dir,
+                #                              device=device)
+                #
+                # experiment.run_multiple(n_experiments=args.n_experiments)
 
 
     print(args)
