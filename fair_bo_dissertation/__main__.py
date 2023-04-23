@@ -90,7 +90,7 @@ def run_dir(experiment_dir: Path):
     target_function = AutomaticTrainer(dataset=config['dataset'],
                                        calculate_epoch_metrics=False,
                                        input_vars=config['input_vars'],
-                                       device=config['device'])
+                                       device=device)
 
     experiment = MOBO_Experiment(target_function,
                                  init_points=config['init_points'],
@@ -149,8 +149,6 @@ if __name__ == '__main__':
 
                 new_experiment_dirs.append(experiment_dir)
 
-                break
-            break
 
         # RUN
 

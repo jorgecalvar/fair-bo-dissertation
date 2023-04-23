@@ -2,6 +2,7 @@
 import logging
 from pathlib import Path
 import torch
+import time
 
 from .candidate_search import qEHVI_CandidateSearcher, qNEHVI_CandidateSearcher, qNParEGO_CandidateSearcher, RandomCandidateSearcher
 
@@ -79,28 +80,44 @@ class MOBO_Experiment:
         else:
             searcher = RandomCandidateSearcher()
 
+        total_time_per_iteration = []
+        get_candidates_time_per_iteration = []
+        target_function_time_per_iteration = []
 
         for i in range(self.n_iterations):
 
+            ts_total = time.perf_counter()
+
+            # Get candidates
+            ts_candidates = time.perf_counter()
             new_x = searcher.get_candidates(x,
                                             y,
                                             n_points=self.n_points)
-            new_y = self._target_function(new_x)
+            get_candidates_time_per_iteration.append(time.perf_counter() - ts_candidates)
 
+            # Target function
+            ts_target = time.perf_counter()
+            new_y = self._target_function(new_x)
+            target_function_time_per_iteration.append(time.perf_counter() - ts_target)
+
+            # Concatenate
             x = torch.cat((x, new_x), dim=0)
             y = torch.cat((y, new_y), dim=0)
 
+            # Obtain HV
             new_hv = DominatedPartitioning(ref_point=self.reference_point,
                                            Y=y).compute_hypervolume()
-
             hv = torch.cat((hv, new_hv.unsqueeze(0)), dim=0)
+
+            total_time_per_iteration.append(time.perf_counter() - ts_total)
 
         # Save
         experiment_dict = {'x': x,
                            'y': y,
                            'hv': hv,
-                           'init_points': self.init_points}
-
+                           'total_time': total_time_per_iteration,
+                           'get_candidates_time': get_candidates_time_per_iteration,
+                           'target_function_time': target_function_time_per_iteration}
 
         torch.save(experiment_dict, self.get_next_iter_path(self.dir))
 
