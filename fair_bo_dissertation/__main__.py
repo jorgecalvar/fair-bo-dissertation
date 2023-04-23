@@ -53,7 +53,7 @@ def find_p():
 
 if __name__ == '__main__':
 
-    # find_p()
+    find_p()
 
     # explore()
 
