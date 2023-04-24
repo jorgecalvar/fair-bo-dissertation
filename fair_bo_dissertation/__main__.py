@@ -165,7 +165,7 @@ if __name__ == '__main__':
     elif args.command == 'visualize':
 
         rx = ResultExplorer(Path(f'experiments/{args.experiment}'))
-        rx.find_p()
+        print(rx.experiment_dicts[0])
 
 
     print(args)
