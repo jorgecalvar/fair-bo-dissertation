@@ -33,11 +33,13 @@ train_parser.add_argument('--n_iterations', type=int, default=15,
                           help='How many iterations to run')
 train_parser.add_argument('--n_points', type=int, default=1,
                           help='How many new candidates to obtain in each iteration')
+train_parser.add_argument('--resume', type=str,
+                          help='Resume the training of an experiment')
+
 
 visualize_parser = subparsers.add_parser('visualize')
 visualize_parser.add_argument('experiment', type=str,
                               help='Name of the dir where the experiment you want to visualize is')
-
 
 def plot_results():
     rx = ResultExplorer(Path('experiments/experiment8'))
@@ -97,7 +99,11 @@ def run_dir(experiment_dir: Path):
                                  dir=experiment_dir,
                                  device=device)
 
-    experiment.run_multiple(n_experiments=args.n_experiments)
+    # Check
+    rx = ResultExplorer(experiment_dir)
+    experiments_to_run = config['n_experiments'] - rx.n_experiments
+
+    experiment.run_multiple(n_experiments=experiments_to_run)
 
 
 
@@ -106,6 +112,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.command == 'train':
+
+        # In resume mode, we run the experiment and resume
+        if args.resume is not None:
+            run_dir(MOBO_Experiment.EXPERIMENTS_DIR / args.resume)
+            quit()
 
         # Dataset
         if args.dataset == 'all':
