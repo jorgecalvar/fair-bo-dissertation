@@ -83,7 +83,6 @@ class AdultDataset(BaseDataset):
 
 
 
-
 if __name__ == '__main__':
     file_path = Path('data/adult-census-income/adult-processed.csv')
     adult_dataset = AdultDataset(file_path)

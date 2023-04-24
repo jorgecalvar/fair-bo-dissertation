@@ -6,8 +6,7 @@ import tqdm
 from sklearn.model_selection import KFold
 from concurrent.futures import ThreadPoolExecutor
 
-from fair_bo_dissertation.datasets import AdultDataset
-from fair_bo_dissertation.datasets import GermanCreditDataset
+from fair_bo_dissertation.datasets import AdultDataset, GermanCreditDataset, CrimeDataset
 from .simple_classifier import SimpleClassifier
 
 import logging
@@ -19,10 +18,10 @@ class AutomaticTrainer:
     """When called, this class trains a model with a certain dataset and returns a list of metrics"""
 
     DATA_DIR = Path('data')
-    VALID_DATASETS = ('adult_census', 'german_credit')
+    VALID_DATASETS = ('adult_census', 'german_credit', 'communities_crime')
 
     def __init__(self,
-                 dataset: Literal['adult_census', 'german_credit'] = 'adult_census',
+                 dataset: Literal['adult_census', 'german_credit', 'communities_crime'] = 'adult_census',
                  model: Literal['simple'] = 'simple',
                  metrics=['acc', 'diff_tpr'],
                  input_vars=['dropout', 'lr'],
@@ -44,6 +43,9 @@ class AutomaticTrainer:
         elif dataset == 'german_credit':
             self.dataset = GermanCreditDataset(self.DATA_DIR / 'german-credit-data' / 'german-credit-processed.csv',
                                                device=self.device)
+        elif dataset == 'communities_crime':
+            self.dataset = CrimeDataset(self.DATA_DIR / 'communities-crime' / 'communities-crime-processed.csv',
+                                        device=self.device)
         else:
             raise ValueError(f'The dataset {dataset} is not implemented')
 

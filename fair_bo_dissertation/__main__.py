@@ -41,6 +41,7 @@ visualize_parser = subparsers.add_parser('visualize')
 visualize_parser.add_argument('experiment', type=str,
                               help='Name of the dir where the experiment you want to visualize is')
 
+
 def plot_results():
     rx = ResultExplorer(Path('experiments/experiment8'))
     # print(rx.find_hv_percentage())
@@ -166,6 +167,11 @@ if __name__ == '__main__':
 
         rx = ResultExplorer(Path(f'experiments/{args.experiment}'))
         print(rx.experiment_dicts[0])
+
+    else:
+
+        trainer = AutomaticTrainer(dataset='communities_crime')
+        print(trainer(torch.tensor([0.5, 0.5])))
 
 
     print(args)
