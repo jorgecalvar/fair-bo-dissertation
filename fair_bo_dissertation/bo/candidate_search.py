@@ -31,6 +31,10 @@ class CandidateSearcher(ABC):
 
 class RandomCandidateSearcher(CandidateSearcher):
 
+    def __init__(self,
+                 device='cpu'):
+        super().__init__(device=device)
+
     def get_candidates(self,
                        x,
                        y,

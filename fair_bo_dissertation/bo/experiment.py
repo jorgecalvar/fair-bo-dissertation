@@ -78,7 +78,7 @@ class MOBO_Experiment:
         elif self.acquisition == 'qnparego':
             searcher = qNParEGO_CandidateSearcher(self.bounds, self.reference_point, device=self.device)
         else:
-            searcher = RandomCandidateSearcher()
+            searcher = RandomCandidateSearcher(device=self.device)
 
         total_time_per_iteration = []
         get_candidates_time_per_iteration = []
