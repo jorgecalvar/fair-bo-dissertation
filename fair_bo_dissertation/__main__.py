@@ -6,7 +6,7 @@ import yaml
 
 from fair_bo_dissertation.bo import MOBO_Experiment
 from fair_bo_dissertation.models import AutomaticTrainer
-from fair_bo_dissertation.viz import ResultExplorer
+from fair_bo_dissertation.viz import ResultsExplorer, ExperimentExplorer
 
 
 parser = ArgumentParser()
@@ -43,7 +43,7 @@ visualize_parser.add_argument('experiment', type=str,
 
 
 def plot_results():
-    rx = ResultExplorer(Path('experiments/experiment8'))
+    rx = ExperimentExplorer(Path('experiments/experiment8'))
     # print(rx.find_hv_percentage())
     # quit()
 
@@ -56,7 +56,7 @@ def explore():
 
     n_points = 3
 
-    rx = ResultExplorer(Path('experiments/experiment11'))
+    rx = ExperimentExplorer(Path('experiments/experiment11'))
     all_bo_hv = torch.zeros((0,))
     all_random_hv = torch.zeros((0,))
     for i in range(5):
@@ -70,7 +70,7 @@ def explore():
 
 
 def explore2():
-    rx = ResultExplorer(Path('experiments/experiment11'))
+    rx = ExperimentExplorer(Path('experiments/experiment11'))
     rx.plot_several_experiments(0, 4, title='Dataset: Adult | Input: lr, dropout')
     quit()
 
@@ -101,7 +101,7 @@ def run_dir(experiment_dir: Path):
                                  device=device)
 
     # Check
-    rx = ResultExplorer(experiment_dir)
+    rx = ExperimentExplorer(experiment_dir)
     experiments_to_run = config['n_experiments'] - rx.n_experiments
 
     experiment.run_multiple(n_experiments=experiments_to_run)
@@ -165,17 +165,20 @@ if __name__ == '__main__':
 
     elif args.command == 'visualize':
 
-        rx = ResultExplorer(Path(f'experiments/{args.experiment}'))
+        rx = ExperimentExplorer(Path(f'experiments/{args.experiment}'))
         print(rx.experiment_dicts[0])
+        rx.plot_hv()
 
     else:
 
-        trainer = AutomaticTrainer(dataset='communities_crime')
-        print(trainer(torch.tensor([0.5, 0.5])))
+        # trainer = AutomaticTrainer(dataset='communities_crime')
+        # print(trainer(torch.tensor([0.5, 0.5])))
+        results_explorer = ResultsExplorer(Path('experiments'))
+        results_explorer.barplot_by_method({'dataset': 'adult_census',
+                                            'input_vars': ['lr', 'dropout']})
 
 
     print(args)
-    print('hola')
 
     quit()
 

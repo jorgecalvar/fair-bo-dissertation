@@ -1,5 +1,6 @@
 
 import numpy as np
+import yaml
 import pandas as pd
 import plotly
 import plotly.graph_objects as go
@@ -9,19 +10,24 @@ import torch
 from botorch.utils.multi_objective.box_decompositions.dominated import DominatedPartitioning
 
 
-class ResultExplorer:
+
+class ExperimentExplorer:
 
     def __init__(self,
                  experiment_dir):
 
-        self.experiment_dicts = []
+        self.config = None
+        if (experiment_dir / 'config.yaml').exists():
+            with (experiment_dir / 'config.yaml').open() as f:
+                self.config = yaml.safe_load(f)
 
+        self.experiment_dicts = []
         i = 0
         while True:
             d = experiment_dir / f'iter{i}.pt'
             if not d.exists():
                 break
-            loaded_dict = torch.load(d)
+            loaded_dict = torch.load(d, map_location='cpu')
             for k, v in loaded_dict.items():
                 if isinstance(v, torch.Tensor):
                     loaded_dict[k] = v.cpu()
@@ -30,6 +36,14 @@ class ResultExplorer:
 
         self.n_experiments  = len(self.experiment_dicts)
 
+    def matches_config(self, config):
+        for k, v in config.items():
+            if self.config[k] != v:
+                return False
+        return True
+
+    def get_last(self, p):
+        return list(map(lambda x: x[p][-1].item(), self.experiment_dicts))
 
     def find_hv_percentage(self):
 
@@ -177,6 +191,94 @@ class ResultExplorer:
             fig.update_layout(title=title)
 
         fig.show()
+
+
+class ResultsExplorer:
+
+    def __init__(self,
+                 experiments_dir):
+
+        self.experiments_dir = experiments_dir
+        self.experiments = []
+
+        for subdir in experiments_dir.iterdir():
+            if not subdir.is_dir():
+                continue
+            experiment = ExperimentExplorer(subdir)
+            if experiment.config is not None:
+                self.experiments.append(experiment)
+
+        print('hola')
+
+
+    def barplot_by_method(self,
+                          config):
+
+        experiments = list(filter(lambda e: e.matches_config(config), self.experiments))
+        n_experiments = experiments[0].config['n_experiments']
+
+        assert len(experiments) == 4
+
+        hvs = list(map(lambda e: e.get_last('hv'), experiments))
+        acquisitions = list(map(lambda e: e.config['acquisition'], experiments))
+
+        d = {acquisitions[i]: np.array(hvs[i]) for i in range(4)}
+
+        solution_dict = {}
+        for k, v in d.items():
+            if k == 'random':
+                continue
+            solution_dict[k] = (v > d['random']).mean()
+
+        print(solution_dict)
+
+        # Confint
+
+        def confint(mean):
+            error = 1.96 * np.sqrt(mean * (1 - mean) / n_experiments)
+            return mean - error, mean + error
+
+        # Data
+        categories = list(solution_dict.keys())
+        means = list(solution_dict.values())
+        confidence_intervals = list(map(confint, means))
+
+        # Create figure
+        fig = go.Figure()
+
+        # Add bar trace
+        fig.add_trace(go.Bar(
+            x=categories,
+            y=means,
+            name='Mean',
+        ))
+
+        # Add error bars for confidence intervals
+        fig.add_trace(go.Bar(
+            x=categories,
+            y=[(ci[1] - ci[0]) / 2 for ci in confidence_intervals],  # Half of the confidence interval
+            base=[mean - (ci[1] - ci[0]) / 2 for mean, ci in zip(means, confidence_intervals)],
+            # Lower bound of the confidence interval
+            error_y=dict(
+                type='data',
+                array=[(ci[1] - ci[0]) / 2 for ci in confidence_intervals],  # Half of the confidence interval
+                visible=True
+            ),
+            marker_color='rgba(0,0,0,0)',  # Transparent color for error bars
+        ))
+
+        # Update layout
+        fig.update_layout(
+            title='Percentage of cases where BO performed better than random guessing',
+            yaxis_title='%',
+            xaxis_title='Acquisition function',
+            showlegend=False,
+            template='plotly_white'
+        )
+
+        # Show the plot
+        fig.show()
+
 
 
 

@@ -1,2 +1,2 @@
 
-from .result_explorer import ResultExplorer
+from .result_explorer import ResultsExplorer, ExperimentExplorer
