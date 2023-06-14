@@ -8,6 +8,7 @@ import plotly.express as px
 from plotly.subplots import make_subplots
 import torch
 from botorch.utils.multi_objective.box_decompositions.dominated import DominatedPartitioning
+import random
 
 
 
@@ -42,8 +43,14 @@ class ExperimentExplorer:
                 return False
         return True
 
-    def get_last(self, p):
+    def get_last_as_item(self, p):
         return list(map(lambda x: x[p][-1].item(), self.experiment_dicts))
+
+    def get_last_as_numpy(self, p):
+        return np.stack(list(map(lambda x: x[p][-1].numpy(), self.experiment_dicts)))
+
+    def get(self, p):
+        return list(map(lambda x: x[p].numpy(), self.experiment_dicts))
 
     def find_hv_percentage(self):
 
@@ -219,7 +226,7 @@ class ResultsExplorer:
 
         assert len(experiments) == 4
 
-        hvs = list(map(lambda e: e.get_last('hv'), experiments))
+        hvs = list(map(lambda e: e.get_last_as_item('hv'), experiments))
         acquisitions = list(map(lambda e: e.config['acquisition'], experiments))
 
         d = {acquisitions[i]: np.array(hvs[i]) for i in range(4)}
@@ -278,6 +285,82 @@ class ResultsExplorer:
 
         # Show the plot
         fig.show()
+
+
+    def plot_points(self,
+                   config):
+
+        experiments = list(filter(lambda e: e.matches_config(config), self.experiments))
+
+        assert len(experiments) == 4
+
+        # Create dataframe
+        df = pd.DataFrame(columns=['accuracy', 'fairness', 'acquisition'])
+        for experiment in experiments:
+            y = experiment.get_last_as_numpy('y')
+            # Get the columns
+            c1 = y[:, 0]
+            c2 = y[:, 1]
+            c3 = [experiment.config['acquisition']] * len(c1)
+            # Transpose
+            data = list(map(list, zip(c1, c2, c3)))
+
+            df_tmp = pd.DataFrame(
+                data=data,
+                columns=df.columns
+            )
+            df = df.append(df_tmp, ignore_index=True)
+
+        # Create the scatter plot
+        fig = px.scatter(df,
+                         x='accuracy',
+                         y='fairness',
+                         color='acquisition',
+                         title='Pareto front | Dataset: '+config['dataset']+' | Optimizing: '+', '.join(config['input_vars']))
+
+        fig.update_layout(template='plotly_white')
+
+        # Display the figure
+        fig.show()
+
+
+    def random_plots(self,
+                     config):
+
+        experiments = list(filter(lambda e: e.matches_config(config), self.experiments))
+        n_experiments = experiments[0].config['n_experiments']
+
+        idx_selected_experiments = random.sample(list(range(n_experiments)), 6)
+        idx_selected_experiments.sort()
+
+        # Create a 3x2 grid of subplots
+        fig = make_subplots(rows=3, cols=2,
+                            subplot_titles=[f'Experiment {idx}' for idx in idx_selected_experiments])
+
+        # Create line plots for each subplot
+        for i in range(6):
+            for j, experiment in enumerate(experiments):
+                fig.add_trace(
+                    go.Scatter(y=experiment.get('hv')[idx_selected_experiments[i]],
+                               marker=dict(color=plotly.colors.DEFAULT_PLOTLY_COLORS[j]),
+                               name=experiment.config['acquisition'],
+                               showlegend=(i == 0)),
+                    row=i//2+1, col=i%2+1
+                )
+
+        # Update layout
+        fig.update_layout(height=800,
+                          width=800,
+                          template='plotly_white',
+                          title_text="Hipervolume evolution of some random plots | Dataset: "+config['dataset']+' | Optimizing: '+', '.join(config['input_vars']))
+
+        # Show the plot
+        fig.show()
+
+
+
+
+
 
 
 

@@ -174,8 +174,8 @@ if __name__ == '__main__':
         # trainer = AutomaticTrainer(dataset='communities_crime')
         # print(trainer(torch.tensor([0.5, 0.5])))
         results_explorer = ResultsExplorer(Path('experiments'))
-        results_explorer.barplot_by_method({'dataset': 'adult_census',
-                                            'input_vars': ['lr', 'dropout']})
+        results_explorer.plot_points({'dataset': 'adult_census',
+                                       'input_vars': ['lr', 'dropout']})
 
 
     print(args)
