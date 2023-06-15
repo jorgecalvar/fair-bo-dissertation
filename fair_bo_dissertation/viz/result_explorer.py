@@ -276,7 +276,7 @@ class ResultsExplorer:
 
         # Update layout
         fig.update_layout(
-            title='Percentage of cases where BO performed better than random guessing',
+            title='Percentage of cases where BO performed better than random guessing (95% confidence interval)<br>Dataset: '+config['dataset']+' | Optimizing: '+', '.join(config['input_vars']),
             yaxis_title='%',
             xaxis_title='Acquisition function',
             showlegend=False,
@@ -350,7 +350,7 @@ class ResultsExplorer:
 
         # Update layout
         fig.update_layout(height=800,
-                          width=800,
+                          width=900,
                           template='plotly_white',
                           title_text="Hipervolume evolution of some random plots | Dataset: "+config['dataset']+' | Optimizing: '+', '.join(config['input_vars']))
 
